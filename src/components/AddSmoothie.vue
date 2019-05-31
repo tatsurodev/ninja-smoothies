@@ -6,6 +6,11 @@
         <label for="title">Smoothie Title:</label>
         <input type="text" name="title" v-model="title">
       </div>
+      <div v-for="(ing, index) in ingredients" :key="index">
+        <label for="ingredient">Ingredient:</label>
+        <!-- v-modelにこのループにしか存在しないingは当てられない -->
+        <input type="text" name="ingredient" v-model="ingredients[index]">
+      </div>
       <div class="field add-ingredient">
         <label for="add-ingredient">Add an ingredient:</label>
         <input type="text" name="add-ingredient" @keydown.tab.prevent="addIng" v-model="another">
@@ -30,12 +35,11 @@ export default {
   },
   methods: {
     AddSmoothie() {
-      // console.log(this.title);
+      console.log(this.title, this.ingredients);
     },
     addIng() {
       if (this.another) {
         this.ingredients.push(this.another);
-        console.log(this.title, this.ingredients);
         // ingredientのフィールドを空にする
         this.another = null;
         // ingredient追加成功時にエラーメッセージのfeedbackを空にする
