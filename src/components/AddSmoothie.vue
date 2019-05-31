@@ -23,6 +23,10 @@
   </div>
 </template>
 <script>
+import db from "@/firebase/init";
+// slug作成用ライブラリ
+import slugify from "slugify";
+
 export default {
   name: "AddSmoothie",
   data() {
@@ -30,12 +34,42 @@ export default {
       title: null,
       another: null,
       ingredients: [],
-      feedback: null
+      feedback: null,
+      slug: null
     };
   },
   methods: {
     AddSmoothie() {
-      console.log(this.title, this.ingredients);
+      // console.log(this.title, this.ingredients);
+      if (this.title) {
+        // エラーメッセージのfeedbackを空に
+        this.feedback = null;
+        // slug作成、第二引数にオプション指定用のオブジェクト
+        this.slug = slugify(this.title, {
+          // 空白の置き換え
+          replacement: "-",
+          // 記号の削除
+          remove: /[$*_+~.()'"!\-:@]/g,
+          // lowercase
+          lower: true
+        });
+        // addでfirestoreにレコード追加
+        db.collection("smoothies")
+          .add({
+            title: this.title,
+            ingredients: this.ingredients,
+            slug: this.slug
+          })
+          .then(() => {
+            // 追加成功時リダイレクト
+            this.$router.push({ name: "Index" });
+          })
+          .catch(err => {
+            console.logl(err);
+          });
+      } else {
+        this.feedback = "You must enter a smoothie title.";
+      }
     },
     addIng() {
       if (this.another) {
