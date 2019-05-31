@@ -25,9 +25,17 @@ export default {
   },
   methods: {
     deleteSmoothie(id) {
-      this.smoothies = this.smoothies.filter(smoothie => {
-        return smoothie.id !== id;
-      });
+      // delete doc from firestore
+      db.collection("smoothies")
+        .doc(id)
+        // deleteでfirestoreのデータ削除
+        .delete()
+        .then(() => {
+          // フロントエンドの表示も削除
+          this.smoothies = this.smoothies.filter(smoothie => {
+            return smoothie.id !== id;
+          });
+        });
       /* 配列操作系のメソッドまとめ
       forEach((val, index, array) => {
         // 破壊的(元の配列が変わる)
@@ -52,6 +60,7 @@ export default {
       .then(snapshot => {
         snapshot.forEach(doc => {
           let smoothie = doc.data();
+          // 各レコードにユニークなidは、doc.data()のプロパティではなく、docのプロパティとして存在しているので、そのidを各doc.data()のプロパティとして挿入
           smoothie.id = doc.id;
           this.smoothies.push(smoothie);
         });
