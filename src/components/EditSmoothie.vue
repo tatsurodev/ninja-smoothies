@@ -27,6 +27,7 @@
 </template>
 <script>
 import db from "@/firebase/init";
+import slugify from "slugify";
 
 export default {
   name: "EditSmoothie",
@@ -40,6 +41,36 @@ export default {
   methods: {
     EditSmoothie() {
       console.log(this.smoothie.title, this.smoothie.ingredients);
+      if (this.smoothie.title) {
+        // エラーメッセージのfeedbackを空に
+        this.feedback = null;
+        // slug作成、第二引数にオプション指定用のオブジェクト
+        this.smoothie.slug = slugify(this.smoothie.title, {
+          // 空白の置き換え
+          replacement: "-",
+          // 記号の削除
+          remove: /[$*_+~.()'"!\-:@]/g,
+          // lowercase
+          lower: true
+        });
+        // 該当レコードを取得してupdate
+        db.collection("smoothies")
+          .doc(this.smoothie.id)
+          .update({
+            title: this.smoothie.title,
+            ingredients: this.smoothie.ingredients,
+            slug: this.smoothie.slug
+          })
+          .then(() => {
+            // 追加成功時リダイレクト
+            this.$router.push({ name: "Index" });
+          })
+          .catch(err => {
+            console.logl(err);
+          });
+      } else {
+        this.feedback = "You must enter a smoothie title.";
+      }
     },
     // addIng, deleteingは、AddSmoothieのメソッドを微調整
     // ingredient追加
